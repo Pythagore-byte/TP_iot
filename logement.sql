@@ -101,7 +101,8 @@ VALUES ('Température', 'THERMO-001', 'COM1', 1, 1);
 -- Détecteur de mouvement dans la Cuisine
 INSERT INTO CapteurActionneur (Type, Reference_commerciale, Port_communication, id_piece, id_type_capteur)
 VALUES ('Mouvement', 'MOTION-001', 'COM3', 2, 2);
-
+INSERT INTO CapteurActionneur (Type, Reference_commerciale, Port_communication, id_piece, id_type_capteur)
+VALUES ('Humidity', 'HUMIDITY-001', 'COM5', 3, 3);
 --question 7 : creer au moins 2 mesures par capteuractionneur
 -- Première mesure de température dans le Salon
 INSERT INTO Mesure (Valeur, id_capteur_actionneur)
@@ -135,3 +136,11 @@ VALUES ('Déchets', 20.00, 15.0, 1);
 -- Facture d'internet
 INSERT INTO Facture (Type_facture, Montant, Valeur_consommee, id_logement)
 VALUES ('Internet', 50.00, 100.0, 1);
+
+CREATE TABLE IF NOT EXISTS Actions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_capteur_actionneur INTEGER,
+    action TEXT NOT NULL,
+    date_action TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_capteur_actionneur) REFERENCES CapteurActionneur(id)
+);

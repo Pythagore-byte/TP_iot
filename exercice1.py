@@ -4,7 +4,6 @@ import random
 # ouverture/initialisation de la base de donnee 
 
 
-
 def initialisation_base():
     conn = sqlite3.connect('mabase.db') #on cree une connexion
     conn.row_factory = sqlite3.Row

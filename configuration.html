@@ -1,0 +1,93 @@
+<!-- <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Configurer Capteurs/Actionneurs</h1>
+        <form id="configuration-form">
+            <div class="mb-3">
+                <label for="type" class="form-label">Type de Capteur</label>
+                <input type="text" class="form-control" id="type" placeholder="Exemple : Température">
+            </div>
+            <div class="mb-3">
+                <label for="reference" class="form-label">Référence</label>
+                <input type="text" class="form-control" id="reference" placeholder="Exemple : CAPTEMP123">
+            </div>
+            <div class="mb-3">
+                <label for="port" class="form-label">Port</label>
+                <input type="text" class="form-control" id="port" placeholder="Exemple : COM3">
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+        </form>
+    </div>
+    <script src="js/configuration.js"></script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration - Éco-Logement</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo"><i class="fas fa-leaf"></i> Éco-Logement</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="consommation.html">Consommation</a></li>
+                <li><a href="capteurs.html">Capteurs</a></li>
+                <li><a href="economie.html">Économie</a></li>
+                <li><a href="configuration.html" class="active">Configuration</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Section principale -->
+    <main class="main-container">
+        <h1>Configurer un Capteur</h1>
+        <p>Ajoutez un capteur ou actionneur à votre maison intelligente.</p>
+        <form class="form">
+            <div class="form-group">
+                <label for="type">Type de Capteur</label>
+                <input type="text" id="type" name="type" placeholder="Exemple : Température" required>
+            </div>
+            <div class="form-group">
+                <label for="reference">Référence Commerciale</label>
+                <input type="text" id="reference" name="reference" placeholder="Exemple : TMP123" required>
+            </div>
+            <div class="form-group">
+                <label for="port">Port de Communication</label>
+                <input type="text" id="port" name="port" placeholder="Exemple : COM3" required>
+            </div>
+            <div class="form-group">
+                <label for="id_piece">ID de la Pièce</label>
+                <input type="number" id="id_piece" name="id_piece" placeholder="Exemple : 1" required>
+            </div>
+            <div class="form-group">
+                <label for="id_type_capteur">ID du Type de Capteur</label>
+                <input type="number" id="id_type_capteur" name="id_type_capteur" placeholder="Exemple : 1" required>
+            </div>
+            <button type="submit" class="btn">Ajouter le Capteur</button>
+        </form>
+    </main>
+   
+
+
+    <!-- Pied de page -->
+    <footer class="footer">
+        <p>&copy; 2024 Éco-Logement - Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

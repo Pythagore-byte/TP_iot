@@ -4,7 +4,6 @@ import sqlite3
 import random
 import httpx
 
-# Remplacez par votre clé API OpenWeatherMap
 API_KEY = "f3e25221109fa7d38b649edfff5827f2"
 BASE_URL = "https://api.openweathermap.org/data/2.5/forecast"
 
