@@ -16,14 +16,14 @@ def initialisation_base():
 
 app = FastAPI()
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Autorise toutes les origines
+    allow_origins=["*"],  # Remplacez "*" par les domaines autorisés si nécessaire
     allow_credentials=True,
-    allow_methods=["*"],  # Autorise toutes les méthodes HTTP
-    allow_headers=["*"],  # Autorise tous les en-têtes
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
 
 
 tables_autorisees = ["Logement", "Piece", "Facture", "Mesure", "CapteurActionneur", "TypeCapteur", ""]
@@ -33,7 +33,8 @@ liste_facture = [
     "Loyer",
     "Déchets",
     "Internet",
-    "Assurance"
+    "Assurance",
+    "Gaz"
 ]
 liste_piece=[
     "Salon",
@@ -281,111 +282,7 @@ async def get_capteurs():
         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
-
-
-
-# @app.get("/economie")
-# async def get_economie():
-#     """
-#     Endpoint pour calculer les économies réalisées par rapport à une cible.
-#     """
-#     try:
-#         consommation_cible = 100  # Définissez la consommation cible ici
-#         conn = initialisation_base()
-#         c = conn.cursor()
-#         query = f"""
-#             SELECT strftime('%Y-%m', date_facture) AS periode,
-#                    SUM(CASE 
-#                        WHEN valeur_consommee < {consommation_cible} 
-#                        THEN {consommation_cible} - valeur_consommee 
-#                        ELSE 0 END) AS economie
-#             FROM Facture
-#             GROUP BY periode
-#             ORDER BY periode ASC;
-#         """
-#         c.execute(query)
-#         economies = c.fetchall()
-#         conn.close()
-
-#         # Transformez les données pour le retour JSON
-#         return [{"periode": row["periode"], "economie": row["economie"]} for row in economies]
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-# @app.get("/economie")
-# async def get_economie(scale: str = "monthly"):
-#     """
-#     Endpoint pour récupérer les économies réalisées.
-#     :param scale: Échelle de temps ("monthly" ou "yearly").
-#     """
-#     try:
-#         conn = initialisation_base()
-#         cursor = conn.cursor()
-
-#         if scale == "monthly":
-#             query = """
-#                 WITH MonthlyConsumption AS (
-#                     SELECT 
-#                         strftime('%Y-%m', date_facture) AS periode,
-#                         type_facture,
-#                         SUM(valeur_consommee) AS consommation_totale
-#                     FROM Facture
-#                     GROUP BY periode, type_facture
-#                 ),
-#                 MonthlyEconomy AS (
-#                     SELECT 
-#                         periode,
-#                         type_facture,
-#                         consommation_totale,
-#                         LAG(consommation_totale) OVER (PARTITION BY type_facture ORDER BY periode) AS consommation_precedente,
-#                         (LAG(consommation_totale) OVER (PARTITION BY type_facture ORDER BY periode) - consommation_totale) AS economie
-#                     FROM MonthlyConsumption
-#                 )
-#                 SELECT 
-#                     periode,
-#                     SUM(economie) AS economie_totale
-#                 FROM MonthlyEconomy
-#                 WHERE economie IS NOT NULL
-#                 GROUP BY periode
-#                 ORDER BY periode ASC;
-#             """
-#         elif scale == "yearly":
-#             query = """
-#                 WITH YearlyConsumption AS (
-#                     SELECT 
-#                         strftime('%Y', date_facture) AS periode,
-#                         type_facture,
-#                         SUM(valeur_consommee) AS consommation_totale
-#                     FROM Facture
-#                     GROUP BY periode, type_facture
-#                 ),
-#                 YearlyEconomy AS (
-#                     SELECT 
-#                         periode,
-#                         type_facture,
-#                         consommation_totale,
-#                         LAG(consommation_totale) OVER (PARTITION BY type_facture ORDER BY periode) AS consommation_precedente,
-#                         (LAG(consommation_totale) OVER (PARTITION BY type_facture ORDER BY periode) - consommation_totale) AS economie
-#                     FROM YearlyConsumption
-#                 )
-#                 SELECT 
-#                     periode,
-#                     SUM(economie) AS economie_totale
-#                 FROM YearlyEconomy
-#                 WHERE economie IS NOT NULL
-#                 GROUP BY periode
-#                 ORDER BY periode ASC;
-#             """
-#         else:
-#             raise HTTPException(status_code=400, detail="Échelle de temps invalide.")
-
-#         cursor.execute(query)
-#         results = cursor.fetchall()
-#         conn.close()
-
-#         return [{"periode": row[0], "economie": row[1]} for row in results]
-
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+    
 @app.get("/economie")
 async def get_economie(scale: str = "monthly"):
     """
@@ -453,44 +350,18 @@ async def get_economie(scale: str = "monthly"):
         else:
             raise HTTPException(status_code=400, detail="Échelle de temps invalide.")
 
-        print("Requête SQL :", query)
+        print("Requête exécutée :", query)
         cursor.execute(query)
         results = cursor.fetchall()
         conn.close()
 
-        print("Résultats de l'API :", results)
-
-        # Transformez les résultats SQL en JSON
+        print("Résultats :", results)
         return [{"periode": row[0], "economie": row[1]} for row in results]
 
     except Exception as e:
-        print("Erreur serveur :", str(e))
-        raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+        print("Erreur serveur :", e)
+        raise HTTPException(status_code=500, detail="Erreur serveur : " + str(e))
 
-
-
-# @app.get("/consommation")
-# async def get_consommation():
-#     """
-#     Endpoint pour récupérer les données de consommation par type.
-#     """
-#     try:
-#         conn = initialisation_base()
-#         c = conn.cursor()
-#         query = """
-#             SELECT type_facture AS type, SUM(valeur_consommee) AS total
-#             FROM Facture
-#             GROUP BY type_facture;
-#         """
-#         c.execute(query)
-#         consommation = c.fetchall()
-#         conn.close()
-
-#         return [{"type": row["type"], "total": row["total"]} for row in consommation]
-#     except sqlite3.Error as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
     
 @app.get("/consommation")
 async def get_consommation():
@@ -562,3 +433,18 @@ async def ajouter_capteur_actionneur(data: dict):
         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+    
+@app.delete("/capteurs/{capteur_id}")
+async def supprimer_capteur(capteur_id: int):
+    try:
+        conn = initialisation_base()
+        c = conn.cursor()
+        c.execute("DELETE FROM CapteurActionneur WHERE id_capteur_actionneur = ?", (capteur_id,))
+        conn.commit()
+        conn.close()
+
+        if c.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Capteur introuvable.")
+        return {"message": "Capteur supprimé avec succès."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

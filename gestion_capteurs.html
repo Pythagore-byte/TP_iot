@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Capteurs</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/gestion_capteurs.js"></script>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Accueil</a></li>
+            <li><a href="economie.html">Économie</a></li>
+            <li><a href="gestion_capteurs.html" class="active">Gestion des Capteurs</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h1>Gérer les Capteurs</h1>
+
+        <!-- Formulaire pour ajouter un capteur -->
+        <section>
+            <h2>Ajouter un Capteur</h2>
+            <form id="form-ajout">
+                <label for="type">Type :</label>
+                <input type="text" id="type" name="type" required>
+                
+                <label for="reference">Référence Commerciale :</label>
+                <input type="text" id="reference" name="reference" required>
+
+                <label for="port">Port de Communication :</label>
+                <input type="text" id="port" name="port" required>
+
+                <label for="id_piece">ID Pièce :</label>
+                <input type="number" id="id_piece" name="id_piece" required>
+
+                <label for="id_type_capteur">ID Type Capteur :</label>
+                <input type="number" id="id_type_capteur" name="id_type_capteur" required>
+
+                <button type="submit">Ajouter Capteur</button>
+            </form>
+        </section>
+
+        <!-- Section pour supprimer un capteur -->
+        <section>
+            <h2>Supprimer un Capteur</h2>
+            <form id="form-suppression">
+                <label for="capteur_id">ID du Capteur :</label>
+                <input type="number" id="capteur_id" name="capteur_id" required>
+                <button type="submit">Supprimer Capteur</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

@@ -315,3 +315,178 @@ body {
     padding: 0.5rem;
     font-size: 1rem;
 }
+
+
+/* Conteneur principal */
+.main-container {
+    padding: 6rem 2rem; /* Ajout de padding pour éviter que le contenu ne soit caché par la navbar */
+    text-align: center;
+}
+
+/* Titre de la page */
+.page-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+/* Conteneur des cartes */
+.card-container {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Styles pour chaque carte */
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombre légère */
+    width: 100%;
+    max-width: 600px;
+    text-align: left; /* Alignement du texte */
+}
+
+/* Groupes de formulaire */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Boutons */
+.btn {
+    padding: 0.8rem 2rem;
+    background-color: #00b894;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease; /* Animation de survol */
+}
+
+.btn:hover {
+    background-color: #019875; /* Couleur plus foncée au survol */
+}
+
+/* Tableaux */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.table th,
+.table td {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    text-align: center; /* Centrer le contenu */
+}
+
+.table th {
+    background-color: #00b894;
+    color: white;
+    text-transform: uppercase;
+}
+
+/* Sous-menus */
+.submenu {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.submenu ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.submenu-link {
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    background-color: #00b894;
+    color: white;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.submenu-link.active {
+    background-color: #019875;
+    font-weight: bold;
+}
+
+.submenu-link:hover {
+    background-color: #019875;
+}
+
+/* Sections dynamiques */
+.config-section {
+    display: none;
+}
+
+.config-section.active {
+    display: block;
+}
+/* Correction pour éviter que le contenu soit masqué par la barre de navigation */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar fixe en haut */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Assure que la barre de navigation est au-dessus du contenu */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Ajout d'un effet d'ombre */
+}
+
+/* Espacement sous la barre de navigation */
+.main-container {
+    margin-top: 80px; /* Ajuste cet espace selon la hauteur réelle de la navbar */
+    padding: 1rem;
+}
+
+/* Tableaux */
+.table {
+    margin-top: 1rem;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    text-align: center;
+    padding: 1rem;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #00b894;
+    color: white;
+    text-transform: uppercase;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Text Centering */
+.text-center {
+    text-align: center;
+}
