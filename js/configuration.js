@@ -29,34 +29,44 @@
 
 // Ajouter un capteur/actionneur
 document.getElementById("configuration-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Empêche le rechargement de la page
 
     // Récupérer les valeurs du formulaire
     const type = document.getElementById("type").value;
-    const reference = document.getElementById("reference").value;
-    const port = document.getElementById("port").value;
+    const reference_commerciale = document.getElementById("reference").value;
+    const port_communication = document.getElementById("port").value;
+    const id_piece = document.getElementById("id_piece").value;
+    const id_type_capteur = document.getElementById("id_type_capteur").value;
 
     try {
         // Envoyer les données à l'API FastAPI
         const response = await fetch("http://127.0.0.1:8000/configuration", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ type, reference, port })
+            body: JSON.stringify({
+                type,
+                reference_commerciale,
+                port_communication,
+                id_piece,
+                id_type_capteur,
+            }),
         });
 
         if (response.ok) {
-            alert("Capteur/Actionneur ajouté avec succès !");
+            alert("Capteur ajouté avec succès !");
             // Réinitialiser le formulaire
             document.getElementById("configuration-form").reset();
-            chargerCapteurs(); // Recharge la liste après l'ajout
         } else {
-            alert("Erreur lors de l'ajout du capteur/actionneur.");
+            const errorData = await response.json();
+            alert(`Erreur : ${errorData.detail}`);
         }
     } catch (error) {
-        console.error("Erreur lors de l'ajout du capteur/actionneur :", error);
-        alert("Impossible de soumettre le formulaire.");
+        console.error("Erreur lors de l'ajout du capteur :", error);
+        alert("Impossible d'ajouter le capteur. Veuillez vérifier votre connexion.");
     }
 });
+
+
 
 // Supprimer un capteur
 async function supprimerCapteur(capteur_id) {
@@ -141,3 +151,40 @@ document.querySelectorAll(".submenu-link").forEach((link) => {
 
 // Charger la liste des capteurs au démarrage
 document.addEventListener("DOMContentLoaded", chargerCapteurs);
+
+document.getElementById("modification-form").addEventListener("submit", async (e) => {
+    e.preventDefault(); // Empêche le rechargement de la page
+
+    // Récupérer les valeurs du formulaire
+    const id = document.getElementById("mod-capteur-id").value;
+    const type = document.getElementById("mod-type").value;
+    const reference_commerciale = document.getElementById("mod-reference").value;
+    const port_communication = document.getElementById("mod-port").value;
+    //const id_type_capteur = document.getElementById("id_type_capteur").value;
+
+    try {
+        // Envoyer les données à l'API FastAPI
+        const response = await fetch(`http://127.0.0.1:8000/capteurs/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                type,
+                reference_commerciale,
+                port_communication,
+                //id_type_capteur,
+            }),
+        });
+
+        if (response.ok) {
+            alert("Capteur modifié avec succès !");
+            // Réinitialiser le formulaire
+            document.getElementById("modification-form").reset();
+        } else {
+            const errorData = await response.json();
+            alert(`Erreur : ${errorData.detail}`);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la modification du capteur :", error);
+        alert("Impossible de modifier le capteur. Veuillez vérifier votre connexion.");
+    }
+});

@@ -230,58 +230,54 @@ async def recevoir_donnees_capteur(data: dict):
         raise HTTPException(status_code=500, detail=str(e))
 @app.get("/capteurs")
 async def get_capteurs():
-    """
-    Endpoint pour récupérer la liste des capteurs/actionneurs avec leurs dernières mesures.
-    """
     try:
         conn = initialisation_base()
         c = conn.cursor()
 
-        # Requête SQL corrigée avec les bonnes colonnes
+        # Récupérer la dernière mesure et déterminer le statut
         query = """
             SELECT 
-                c.id_capteur_actionneur AS capteur_id,
-                c.type AS capteur_type, 
-                c.reference_commerciale AS reference, 
+                c.id_capteur_actionneur AS id,
+                c.type AS type_capteur,
+                c.reference_commerciale AS reference,
                 c.port_communication AS port,
-                p.nom_piece AS piece_nom, -- Utilisation de nom_piece
+                p.nom_piece AS piece,
                 m.valeur AS derniere_valeur,
-                m.date_insertion AS date_mesure
-            FROM 
-                CapteurActionneur c
-            LEFT JOIN 
-                Piece p ON c.id_piece = p.id_piece
-            LEFT JOIN 
-                Mesure m ON m.id_capteur_actionneur = c.id_capteur_actionneur
-            WHERE 
-                m.date_insertion = (
-                    SELECT MAX(date_insertion) 
-                    FROM Mesure 
-                    WHERE id_capteur_actionneur = c.id_capteur_actionneur
-                )
-                OR m.id_capteur_actionneur IS NULL;
+                m.date_insertion AS date_mesure,
+                CASE 
+                    WHEN (strftime('%s', 'now') - strftime('%s', m.date_insertion)) <= 300 THEN 'Actif'
+                    ELSE 'Inactif'
+                END AS statut
+            FROM CapteurActionneur c
+            LEFT JOIN Mesure m ON c.id_capteur_actionneur = m.id_capteur_actionneur
+            LEFT JOIN Piece p ON c.id_piece = p.id_piece
+            WHERE m.date_insertion = (
+                SELECT MAX(date_insertion)
+                FROM Mesure
+                WHERE id_capteur_actionneur = c.id_capteur_actionneur
+            )
+            OR m.id_capteur_actionneur IS NULL;
         """
         c.execute(query)
         capteurs = c.fetchall()
         conn.close()
 
-        # Préparer les résultats pour le retour JSON
         return [
             {
-                "id": row["capteur_id"],
-                "type": row["capteur_type"],
+                "id": row["id"],
+                "type": row["type_capteur"],
                 "reference": row["reference"],
                 "port": row["port"],
-                "piece": row["piece_nom"],
-                "valeur": row["derniere_valeur"],
-                "date": row["date_mesure"],
+                "piece": row["piece"],
+                "derniere_valeur": row["derniere_valeur"],
+                "date_mesure": row["date_mesure"],
+                "statut": row["statut"],
             }
             for row in capteurs
         ]
-    except sqlite3.Error as e:
-        raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
     
 @app.get("/economie")
 async def get_economie(scale: str = "monthly"):
@@ -434,6 +430,7 @@ async def ajouter_capteur_actionneur(data: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
     
+
 @app.delete("/capteurs/{capteur_id}")
 async def supprimer_capteur(capteur_id: int):
     try:
@@ -448,3 +445,56 @@ async def supprimer_capteur(capteur_id: int):
         return {"message": "Capteur supprimé avec succès."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/capteurs/{capteur_id}")
+async def modifier_capteur(capteur_id: int, data: dict):
+    """
+    Endpoint pour modifier un capteur existant dans la base de données.
+    """
+    try:
+        # Récupérer les données envoyées
+        type_capteur = data.get("type")
+        reference_commerciale = data.get("reference_commerciale")
+        port_communication = data.get("port_communication")
+
+        # Vérifier qu'au moins un champ est renseigné
+        if not any([type_capteur, reference_commerciale, port_communication]):
+            raise HTTPException(status_code=400, detail="Aucune donnée à modifier n'a été fournie.")
+
+        # Construire dynamiquement la requête de mise à jour
+        update_fields = []
+        update_values = []
+
+        if type_capteur:
+            update_fields.append("type = ?")
+            update_values.append(type_capteur)
+        if reference_commerciale:
+            update_fields.append("reference_commerciale = ?")
+            update_values.append(reference_commerciale)
+        if port_communication:
+            update_fields.append("port_communication = ?")
+            update_values.append(port_communication)
+
+        update_values.append(capteur_id)
+
+        conn = initialisation_base()
+        c = conn.cursor()
+        query = f"""
+            UPDATE CapteurActionneur
+            SET {', '.join(update_fields)}
+            WHERE id_capteur_actionneur = ?
+        """
+        c.execute(query, tuple(update_values))
+        conn.commit()
+
+        # Vérifier si un capteur a été mis à jour
+        if c.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Capteur introuvable.")
+
+        conn.close()
+        return {"status": "success", "message": "Capteur modifié avec succès."}
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
