@@ -490,3 +490,85 @@ body {
 .text-center {
     text-align: center;
 }
+
+/* pour les logements */
+/* Tabs pour le menu des logements */
+.tabs {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+    border-bottom: 2px solid #ddd;
+}
+
+.tabs li {
+    margin-right: 2rem;
+}
+
+.tabs .tab-link {
+    text-decoration: none;
+    color: #555;
+    font-weight: bold;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s, color 0.3s;
+}
+
+.tabs .tab-link:hover,
+.tabs .tab-link.active {
+    color: #00b894;
+    border-color: #00b894;
+}
+
+/* Contenu des tabs */
+.tab-content {
+    display: none;
+    margin-top: 2rem;
+}
+
+.tab-content.active {
+    display: block;
+}
+/* Gestion des sous-menus */
+.submenu ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.submenu ul li a {
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    background: #ddd;
+    color: #333;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.submenu ul li a.active {
+    background: #00b894;
+    color: white;
+}
+
+/* Sections dynamiques */
+.config-section {
+    display: none;
+    margin-top: 2rem;
+}
+
+.config-section.active {
+    display: block;
+}
+.config-section {
+    display: none; /* Les sections sont masquées par défaut */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.config-section.active {
+    display: block; /* La section active est visible */
+    opacity: 1;
+}
+

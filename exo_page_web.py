@@ -498,3 +498,173 @@ async def modifier_capteur(capteur_id: int, data: dict):
         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+
+
+@app.get("/logements")
+async def get_logements():
+    try:
+        conn = initialisation_base()
+        c = conn.cursor()
+        query = """
+            SELECT id_logement AS id, 
+                   adresse, 
+                   numero_telephone AS telephone, 
+                   adresse_ip AS ip, 
+                   date_insertion 
+            FROM Logement;
+        """
+        c.execute(query)
+        logements = c.fetchall()
+        conn.close()
+
+        return [
+            {
+                "id": row["id"],
+                "adresse": row["adresse"],
+                "telephone": row["telephone"],
+                "ip": row["ip"],
+                "date_insertion": row["date_insertion"],
+            }
+            for row in logements
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/logements")
+async def add_logement(data: dict):
+    """
+    Endpoint pour ajouter un logement à la base de données.
+    Exemple de données envoyées :
+    {
+        "adresse": "123 Rue des Lilas",
+        "numero_telephone": "0102030405",
+        "adresse_ip": "192.168.0.1"
+    }
+    """
+    adresse = data.get("adresse")
+    numero_telephone = data.get("numero_telephone")
+    adresse_ip = data.get("adresse_ip")
+
+    if not all([adresse, numero_telephone, adresse_ip]):
+        raise HTTPException(status_code=400, detail="Données manquantes.")
+
+    conn = initialisation_base()
+    c = conn.cursor()
+    query = "INSERT INTO Logement (adresse, numero_telephone, adresse_ip) VALUES (?, ?, ?)"
+    c.execute(query, (adresse, numero_telephone, adresse_ip))
+    conn.commit()
+    conn.close()
+
+    return {"status": "success", "message": "Logement ajouté avec succès"}
+
+
+@app.delete("/logements/{id}")
+async def delete_logement(id: int):
+    conn = initialisation_base()
+    c = conn.cursor()
+    c.execute("DELETE FROM Logement WHERE id_logement = ?", (id,))
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": "Logement supprimé avec succès"}
+
+
+# @app.put("/logements/{logement_id}")
+# async def modifier_logement(logement_id: int, data: dict):
+#     """
+#     Endpoint pour modifier un logement.
+#     Exemple de données JSON envoyées :
+#     {
+#         "adresse": "Nouvelle adresse",
+#         "numero_telephone": "Nouveau numéro",
+#         "adresse_ip": "Nouvelle IP"
+#     }
+#     """
+#     try:
+#         # Connexion à la base
+#         conn = initialisation_base()
+#         c = conn.cursor()
+
+#         # Vérifier si le logement existe
+#         c.execute("SELECT * FROM Logement WHERE id_logement = ?", (logement_id,))
+#         logement = c.fetchone()
+#         if not logement:
+#             raise HTTPException(status_code=404, detail="Logement introuvable")
+
+#         # Construire la requête de mise à jour
+#         updates = []
+#         values = []
+#         if "adresse" in data:
+#             updates.append("adresse = ?")
+#             values.append(data["adresse"])
+#         if "numero_telephone" in data:
+#             updates.append("numero_telephone = ?")
+#             values.append(data["numero_telephone"])
+#         if "adresse_ip" in data:
+#             updates.append("adresse_ip = ?")
+#             values.append(data["adresse_ip"])
+
+#         if not updates:
+#             raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+
+#         values.append(logement_id)
+#         query = f"UPDATE Logement SET {', '.join(updates)} WHERE id_logement = ?"
+#         c.execute(query, tuple(values))
+#         conn.commit()
+#         conn.close()
+
+#         return {"status": "success", "message": "Logement modifié avec succès."}
+#     except sqlite3.Error as e:
+#         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+
+@app.put("/logements/{logement_id}")
+async def modifier_logement(logement_id: int, data: dict):
+    """
+    Endpoint pour modifier un logement.
+    Exemple de données JSON envoyées :
+    {
+        "adresse": "Nouvelle adresse",
+        "numero_telephone": "123456789",
+        "adresse_ip": "192.168.0.1"
+    }
+    """
+    try:
+        conn = initialisation_base()
+        c = conn.cursor()
+
+        # Construction dynamique de la requête SQL en fonction des champs fournis
+        update_fields = []
+        update_values = []
+
+        if "adresse" in data and data["adresse"]:
+            update_fields.append("adresse = ?")
+            update_values.append(data["adresse"])
+        if "numero_telephone" in data and data["numero_telephone"]:
+            update_fields.append("numero_telephone = ?")
+            update_values.append(data["numero_telephone"])
+        if "adresse_ip" in data and data["adresse_ip"]:
+            update_fields.append("adresse_ip = ?")
+            update_values.append(data["adresse_ip"])
+
+        # Si aucun champ n'est fourni, renvoyer une erreur
+        if not update_fields:
+            raise HTTPException(status_code=400, detail="Aucun champ valide à mettre à jour.")
+
+        # Ajout de l'ID du logement pour la clause WHERE
+        update_values.append(logement_id)
+
+        query = f"UPDATE Logement SET {', '.join(update_fields)} WHERE id_logement = ?"
+        c.execute(query, update_values)
+        conn.commit()
+
+        if c.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Logement non trouvé.")
+        
+        conn.close()
+        return {"status": "success", "message": "Logement modifié avec succès."}
+
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
