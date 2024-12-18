@@ -597,3 +597,11 @@ body {
     max-width: 500px;
     width: 90%;
 }
+.etat-actif {
+    color: rgb(59, 90, 59);
+    font-weight: bold;
+}
+.etat-inactif {
+    color: red;
+    font-weight: bold;
+}
