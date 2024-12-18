@@ -5,6 +5,7 @@ import random
 import httpx
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from datetime import datetime, timedelta
 
 API_KEY = "f3e25221109fa7d38b649edfff5827f2"
 BASE_URL = "https://api.openweathermap.org/data/2.5/forecast"
@@ -142,6 +143,7 @@ async def previsions_meteo(ville: str = "Conakry"):
         raise HTTPException(status_code=e.response.status_code, detail="Erreur lors de la récupération des prévisions météo.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+    
 @app.post("/typecapteur/creer")
 async def creer_typecapteur(nom: str, unite: str, precision: str):
     """
@@ -229,57 +231,8 @@ async def recevoir_donnees_capteur(data: dict):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-# @app.get("/capteurs")
-# async def get_capteurs():
-#     try:
-#         conn = initialisation_base()
-#         c = conn.cursor()
+    raise HTTPException(status_code=500, detail=str(e))
 
-#         # Récupérer la dernière mesure et déterminer le statut
-#         query = """
-#             SELECT 
-#                 c.id_capteur_actionneur AS id,
-#                 c.type AS type_capteur,
-#                 c.reference_commerciale AS reference,
-#                 c.port_communication AS port,
-#                 p.nom_piece AS piece,
-#                 m.valeur AS derniere_valeur,
-#                 m.date_insertion AS date_mesure,
-#                 CASE 
-#                     WHEN (strftime('%s', 'now') - strftime('%s', m.date_insertion)) <= 300 THEN 'Actif'
-#                     ELSE 'Inactif'
-#                 END AS statut
-#             FROM CapteurActionneur c
-#             LEFT JOIN Mesure m ON c.id_capteur_actionneur = m.id_capteur_actionneur
-#             LEFT JOIN Piece p ON c.id_piece = p.id_piece
-#             WHERE m.date_insertion = (
-#                 SELECT MAX(date_insertion)
-#                 FROM Mesure
-#                 WHERE id_capteur_actionneur = c.id_capteur_actionneur
-#             )
-#             OR m.id_capteur_actionneur IS NULL;
-#         """
-#         c.execute(query)
-#         capteurs = c.fetchall()
-#         conn.close()
-
-#         return [
-#             {
-#                 "id": row["id"],
-#                 "type": row["type_capteur"],
-#                 "reference": row["reference"],
-#                 "port": row["port"],
-#                 "piece": row["piece"],
-#                 "derniere_valeur": row["derniere_valeur"],
-#                 "date_mesure": row["date_mesure"],
-#                 "statut": row["statut"],
-#             }
-#             for row in capteurs
-#         ]
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-from datetime import datetime, timedelta
 
 @app.get("/capteurs")
 async def get_capteurs():
@@ -736,10 +689,109 @@ def get_db():
 #     pieces = cursor.fetchall()
 #     conn.close()
 #     return [{"id_piece": row[0], "nom_piece": row[1], "coordonnees_x": row[2], "coordonnees_y": row[3], "coordonnees_z": row[4]} for row in pieces]
-from fastapi import HTTPException
+
+
+# @app.get("/pieces/{id_logement}")
+# async def get_pieces(id_logement: int):
+#     conn = get_db()
+#     cursor = conn.cursor()
+
+#     # Vérifier si le logement existe
+#     cursor.execute("SELECT COUNT(*) FROM Logement WHERE id_logement = ?", (id_logement,))
+#     logement_existe = cursor.fetchone()[0]
+
+#     if not logement_existe:
+#         conn.close()
+#         raise HTTPException(status_code=404, detail=f"Le logement avec ID {id_logement} n'existe pas.")
+
+#     # Récupérer les pièces associées à ce logement
+#     cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
+#     pieces = cursor.fetchall()
+#     conn.close()
+
+#     # Retourner les résultats ou un message si aucune pièce n'est trouvée
+#     if not pieces:
+#         raise HTTPException(status_code=404, detail=f"Aucune pièce trouvée pour le logement avec ID {id_logement}.")
+
+#     return [
+#         {
+#             "id_piece": row[0],
+#             "nom_piece": row[1],
+#             "coordonnees_x": row[2],
+#             "coordonnees_y": row[3],
+#             "coordonnees_z": row[4]
+#         } 
+#         for row in pieces
+#     ]
+# @app.get("/pieces/{id_logement}")
+# async def get_pieces(id_logement: int):
+#     conn = get_db()
+#     cursor = conn.cursor()
+
+#     # Vérifier si le logement existe
+#     cursor.execute("SELECT COUNT(*) FROM Logement WHERE id_logement = ?", (id_logement,))
+#     logement_existe = cursor.fetchone()[0]
+
+#     if not logement_existe:
+#         conn.close()
+#         raise HTTPException(status_code=404, detail=f"Le logement avec ID {id_logement} n'existe pas.")
+
+#     # Récupérer les pièces associées à ce logement
+#     cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
+#     pieces = cursor.fetchall()
+#     conn.close()
+
+#     # Retourner une liste vide si aucune pièce n'est trouvée
+#     if not pieces:
+#         return []
+
+#     return [
+#         {
+#             "id_piece": row[0],
+#             "nom_piece": row[1],
+#             "coordonnees_x": row[2],
+#             "coordonnees_y": row[3],
+#             "coordonnees_z": row[4]
+#         }
+#         for row in pieces
+#     ]
+# @app.get("/pieces/{id_logement}")
+# async def get_pieces(id_logement: int):
+#     conn = get_db()
+#     cursor = conn.cursor()
+
+#     # Vérifier si le logement existe
+#     cursor.execute("SELECT COUNT(*) FROM Logement WHERE id_logement = ?", (id_logement,))
+#     logement_existe = cursor.fetchone()[0]
+
+#     if not logement_existe:
+#         conn.close()
+#         raise HTTPException(status_code=404, detail=f"Le logement avec ID {id_logement} n'existe pas.")
+
+#     # Récupérer les pièces associées à ce logement
+#     cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
+#     pieces = cursor.fetchall()
+#     conn.close()
+
+#     # Retourner une liste vide si aucune pièce n'est trouvée
+#     return [
+#         {
+#             "id_piece": row[0],
+#             "nom_piece": row[1],
+#             "coordonnees_x": row[2],
+#             "coordonnees_y": row[3],
+#             "coordonnees_z": row[4]
+#         }
+#         for row in pieces
+#     ]
+
+from fastapi import HTTPException, Path
 
 @app.get("/pieces/{id_logement}")
-async def get_pieces(id_logement: int):
+async def get_pieces(id_logement: int = Path(..., title="L'identifiant du logement", ge=1)):
+    if not id_logement:
+        raise HTTPException(status_code=422, detail="L'identifiant du logement est requis.")
+
     conn = get_db()
     cursor = conn.cursor()
 
@@ -756,10 +808,7 @@ async def get_pieces(id_logement: int):
     pieces = cursor.fetchall()
     conn.close()
 
-    # Retourner les résultats ou un message si aucune pièce n'est trouvée
-    if not pieces:
-        raise HTTPException(status_code=404, detail=f"Aucune pièce trouvée pour le logement avec ID {id_logement}.")
-
+    # Retourner une liste vide si aucune pièce n'est trouvée
     return [
         {
             "id_piece": row[0],
@@ -767,7 +816,7 @@ async def get_pieces(id_logement: int):
             "coordonnees_x": row[2],
             "coordonnees_y": row[3],
             "coordonnees_z": row[4]
-        } 
+        }
         for row in pieces
     ]
 

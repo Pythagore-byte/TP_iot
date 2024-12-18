@@ -8,38 +8,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- Barre de navigation -->
+    <!-- Barre de navigation principale -->
     <nav class="navbar">
         <div class="container">
             <a href="index.html" class="logo"><i class="fas fa-leaf"></i> Éco-Logement</a>
             <ul class="nav-links">
                 <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
                 <li><a href="consommation.html"><i class="fas fa-chart-bar"></i> Consommation</a></li>
-                <li><a href="capteurs.html" class="active"><i class="fas fa-microchip"></i> Capteurs</a></li>
+                <li><a href="capteurs.html"><i class="fas fa-microchip"></i> Capteurs</a></li>
                 <li><a href="economie.html"><i class="fas fa-coins"></i> Économie</a></li>
                 <li><a href="configuration.html"><i class="fas fa-tools"></i> Configuration</a></li>
                 <li><a href="logements.html"><i class="fas fa-building"></i> Logements</a></li>
-                <li><a href="pieces.html"><i class="fas fa-couch"></i> Pièces</a></li>
+                <li><a href="pieces.html" class="active"><i class="fas fa-couch"></i> Pièces</a></li>
             </ul>
         </div>
     </nav>
 
-
-    <!-- Contenu principal -->
+    <!-- Conteneur principal -->
     <main class="main-container">
         <h1>Gestion des Pièces</h1>
 
-        <!-- Sélectionner un logement -->
+        <!-- Sélection d'un logement -->
         <section>
-            <label for="logement-select">Sélectionnez un Logement :</label>
-            <select id="logement-select">
+            <h2>Sélectionner un Logement</h2>
+            <select id="logement-select" class="form-select">
                 <option value="">-- Sélectionnez un logement --</option>
             </select>
         </section>
 
-        <!-- Liste des pièces -->
-        <section>
+        <!-- Tableau pour afficher les pièces -->
+        <section id="afficher-pieces" class="config-section active">
             <h2>Liste des Pièces</h2>
+            <button id="open-add-piece-modal" class="btn">Ajouter une Pièce</button>
             <table class="table">
                 <thead>
                     <tr>
@@ -51,45 +51,47 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="pieces-table"></tbody>
+                <tbody id="pieces-table">
+                    <tr><td colspan="6">Sélectionnez un logement pour voir ses pièces.</td></tr>
+                </tbody>
             </table>
         </section>
 
-        <!-- Ajouter une pièce -->
-        <section>
-            <h2>Ajouter une Pièce</h2>
-            <form id="add-piece-form">
-                <label>Nom :</label>
-                <input type="text" id="nom-piece-add" placeholder="Nom de la pièce" required>
-                <label>Coordonnées X :</label>
-                <input type="number" id="coordonnees-x-add" placeholder="0">
-                <label>Coordonnées Y :</label>
-                <input type="number" id="coordonnees-y-add" placeholder="0">
-                <label>Coordonnées Z :</label>
-                <input type="number" id="coordonnees-z-add" placeholder="0">
-                <button type="submit" class="btn">Ajouter</button>
-            </form>
-        </section>
-
-        <!-- Modifier une pièce -->
-        <section>
-            <h2>Modifier une Pièce</h2>
-            <form id="edit-piece-form">
-                <label>ID de la pièce :</label>
-                <input type="number" id="piece-id-edit" placeholder="Entrez l'ID de la pièce" readonly>
-                <label>Nouveau Nom :</label>
-                <input type="text" id="nom-piece-edit" placeholder="Nouveau nom de la pièce">
-                <label>Nouvelle Coordonnée X :</label>
-                <input type="number" id="coordonnees-x-edit" placeholder="0">
-                <label>Nouvelle Coordonnée Y :</label>
-                <input type="number" id="coordonnees-y-edit" placeholder="0">
-                <label>Nouvelle Coordonnée Z :</label>
-                <input type="number" id="coordonnees-z-edit" placeholder="0">
-                <button type="submit" class="btn">Modifier</button>
-            </form>
-        </section>
+        <!-- Modal pour Ajouter ou Modifier une pièce -->
+        <div id="piece-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="modal-title">Ajouter une Pièce</h2>
+                <form id="piece-form" class="form">
+                    <input type="hidden" id="piece-id" />
+                    <div class="form-group">
+                        <label for="nom-piece">Nom de la Pièce</label>
+                        <input type="text" id="nom-piece" placeholder="Exemple : Salon" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coordonnees-x">Coordonnée X</label>
+                        <input type="number" id="coordonnees-x" placeholder="Exemple : 0">
+                    </div>
+                    <div class="form-group">
+                        <label for="coordonnees-y">Coordonnée Y</label>
+                        <input type="number" id="coordonnees-y" placeholder="Exemple : 0">
+                    </div>
+                    <div class="form-group">
+                        <label for="coordonnees-z">Coordonnée Z</label>
+                        <input type="number" id="coordonnees-z" placeholder="Exemple : 0">
+                    </div>
+                    <button type="submit" class="btn">Valider</button>
+                    <button type="button" id="close-modal" class="btn btn-secondary">Annuler</button>
+                </form>
+            </div>
+        </div>
     </main>
 
+    <!-- Pied de page -->
+    <footer class="footer">
+        <p>&copy; 2024 Éco-Logement - Tous droits réservés.</p>
+    </footer>
+
+    <!-- Script pour gérer les actions sur les pièces -->
     <script src="js/pieces.js"></script>
 </body>
 </html>
