@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Pièces - Éco-Logement</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo"><i class="fas fa-leaf"></i> Éco-Logement</a>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> Accueil</a></li>
+                <li><a href="consommation.html"><i class="fas fa-chart-bar"></i> Consommation</a></li>
+                <li><a href="capteurs.html" class="active"><i class="fas fa-microchip"></i> Capteurs</a></li>
+                <li><a href="economie.html"><i class="fas fa-coins"></i> Économie</a></li>
+                <li><a href="configuration.html"><i class="fas fa-tools"></i> Configuration</a></li>
+                <li><a href="logements.html"><i class="fas fa-building"></i> Logements</a></li>
+                <li><a href="pieces.html"><i class="fas fa-couch"></i> Pièces</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <!-- Contenu principal -->
+    <main class="main-container">
+        <h1>Gestion des Pièces</h1>
+
+        <!-- Sélectionner un logement -->
+        <section>
+            <label for="logement-select">Sélectionnez un Logement :</label>
+            <select id="logement-select">
+                <option value="">-- Sélectionnez un logement --</option>
+            </select>
+        </section>
+
+        <!-- Liste des pièces -->
+        <section>
+            <h2>Liste des Pièces</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Coordonnées X</th>
+                        <th>Coordonnées Y</th>
+                        <th>Coordonnées Z</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pieces-table"></tbody>
+            </table>
+        </section>
+
+        <!-- Ajouter une pièce -->
+        <section>
+            <h2>Ajouter une Pièce</h2>
+            <form id="add-piece-form">
+                <label>Nom :</label>
+                <input type="text" id="nom-piece-add" placeholder="Nom de la pièce" required>
+                <label>Coordonnées X :</label>
+                <input type="number" id="coordonnees-x-add" placeholder="0">
+                <label>Coordonnées Y :</label>
+                <input type="number" id="coordonnees-y-add" placeholder="0">
+                <label>Coordonnées Z :</label>
+                <input type="number" id="coordonnees-z-add" placeholder="0">
+                <button type="submit" class="btn">Ajouter</button>
+            </form>
+        </section>
+
+        <!-- Modifier une pièce -->
+        <section>
+            <h2>Modifier une Pièce</h2>
+            <form id="edit-piece-form">
+                <label>ID de la pièce :</label>
+                <input type="number" id="piece-id-edit" placeholder="Entrez l'ID de la pièce" readonly>
+                <label>Nouveau Nom :</label>
+                <input type="text" id="nom-piece-edit" placeholder="Nouveau nom de la pièce">
+                <label>Nouvelle Coordonnée X :</label>
+                <input type="number" id="coordonnees-x-edit" placeholder="0">
+                <label>Nouvelle Coordonnée Y :</label>
+                <input type="number" id="coordonnees-y-edit" placeholder="0">
+                <label>Nouvelle Coordonnée Z :</label>
+                <input type="number" id="coordonnees-z-edit" placeholder="0">
+                <button type="submit" class="btn">Modifier</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="js/pieces.js"></script>
+</body>
+</html>

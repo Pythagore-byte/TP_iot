@@ -184,3 +184,17 @@ INSERT INTO Facture (type_facture, date_facture, montant, valeur_consommee, id_l
 ('Gaz', '2023-03-16 00:00:00', 70.56, 144.27, 1),
 ('Gaz', '2023-04-15 00:00:00', 48.39, 122.57, 2),
 ('Gaz', '2023-05-15 00:00:00', 82.47, 149.99, 1);
+
+CREATE TABLE Piece_temp (
+    id_piece INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom_piece TEXT NOT NULL,
+    coordonnees_x REAL,
+    coordonnees_y REAL,
+    coordonnees_z REAL,
+    id_logement INTEGER NOT NULL,
+    FOREIGN KEY (id_logement) REFERENCES Logement(id_logement) ON DELETE CASCADE
+);
+INSERT INTO Piece_temp (id_piece, nom_piece, coordonnees_x, coordonnees_y, coordonnees_z, id_logement)
+SELECT id_piece, nom_piece, coordonnees_x, coordonnees_y, coordonnees_z, id_logement FROM Piece;
+DROP TABLE Piece;
+ALTER TABLE Piece_temp RENAME TO Piece;

@@ -4,6 +4,7 @@ import sqlite3
 import random
 import httpx
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 API_KEY = "f3e25221109fa7d38b649edfff5827f2"
 BASE_URL = "https://api.openweathermap.org/data/2.5/forecast"
@@ -228,56 +229,102 @@ async def recevoir_donnees_capteur(data: dict):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+# @app.get("/capteurs")
+# async def get_capteurs():
+#     try:
+#         conn = initialisation_base()
+#         c = conn.cursor()
+
+#         # Récupérer la dernière mesure et déterminer le statut
+#         query = """
+#             SELECT 
+#                 c.id_capteur_actionneur AS id,
+#                 c.type AS type_capteur,
+#                 c.reference_commerciale AS reference,
+#                 c.port_communication AS port,
+#                 p.nom_piece AS piece,
+#                 m.valeur AS derniere_valeur,
+#                 m.date_insertion AS date_mesure,
+#                 CASE 
+#                     WHEN (strftime('%s', 'now') - strftime('%s', m.date_insertion)) <= 300 THEN 'Actif'
+#                     ELSE 'Inactif'
+#                 END AS statut
+#             FROM CapteurActionneur c
+#             LEFT JOIN Mesure m ON c.id_capteur_actionneur = m.id_capteur_actionneur
+#             LEFT JOIN Piece p ON c.id_piece = p.id_piece
+#             WHERE m.date_insertion = (
+#                 SELECT MAX(date_insertion)
+#                 FROM Mesure
+#                 WHERE id_capteur_actionneur = c.id_capteur_actionneur
+#             )
+#             OR m.id_capteur_actionneur IS NULL;
+#         """
+#         c.execute(query)
+#         capteurs = c.fetchall()
+#         conn.close()
+
+#         return [
+#             {
+#                 "id": row["id"],
+#                 "type": row["type_capteur"],
+#                 "reference": row["reference"],
+#                 "port": row["port"],
+#                 "piece": row["piece"],
+#                 "derniere_valeur": row["derniere_valeur"],
+#                 "date_mesure": row["date_mesure"],
+#                 "statut": row["statut"],
+#             }
+#             for row in capteurs
+#         ]
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
+from datetime import datetime, timedelta
+
 @app.get("/capteurs")
 async def get_capteurs():
+    conn = get_db()
+    cursor = conn.cursor()
     try:
-        conn = initialisation_base()
-        c = conn.cursor()
-
-        # Récupérer la dernière mesure et déterminer le statut
+        # Requête pour obtenir les capteurs avec leur dernière mesure et état
         query = """
             SELECT 
-                c.id_capteur_actionneur AS id,
-                c.type AS type_capteur,
-                c.reference_commerciale AS reference,
-                c.port_communication AS port,
-                p.nom_piece AS piece,
-                m.valeur AS derniere_valeur,
-                m.date_insertion AS date_mesure,
+                C.id_capteur_actionneur, 
+                C.type, 
+                C.reference_commerciale, 
+                C.port_communication, 
+                P.nom_piece, 
+                IFNULL(MAX(M.valeur), 'Aucune') AS derniere_valeur,
+                IFNULL(MAX(M.date_insertion), 'Non disponible') AS derniere_mise_a_jour,
                 CASE 
-                    WHEN (strftime('%s', 'now') - strftime('%s', m.date_insertion)) <= 300 THEN 'Actif'
+                    WHEN MAX(M.date_insertion) >= datetime('now', '-5 minutes') THEN 'Actif'
                     ELSE 'Inactif'
-                END AS statut
-            FROM CapteurActionneur c
-            LEFT JOIN Mesure m ON c.id_capteur_actionneur = m.id_capteur_actionneur
-            LEFT JOIN Piece p ON c.id_piece = p.id_piece
-            WHERE m.date_insertion = (
-                SELECT MAX(date_insertion)
-                FROM Mesure
-                WHERE id_capteur_actionneur = c.id_capteur_actionneur
-            )
-            OR m.id_capteur_actionneur IS NULL;
+                END AS etat
+            FROM CapteurActionneur C
+            LEFT JOIN Piece P ON C.id_piece = P.id_piece
+            LEFT JOIN Mesure M ON C.id_capteur_actionneur = M.id_capteur_actionneur
+            GROUP BY C.id_capteur_actionneur
         """
-        c.execute(query)
-        capteurs = c.fetchall()
-        conn.close()
+        cursor.execute(query)
+        capteurs = cursor.fetchall()
 
-        return [
+        # Formater les résultats
+        result = [
             {
-                "id": row["id"],
-                "type": row["type_capteur"],
-                "reference": row["reference"],
-                "port": row["port"],
-                "piece": row["piece"],
-                "derniere_valeur": row["derniere_valeur"],
-                "date_mesure": row["date_mesure"],
-                "statut": row["statut"],
+                "id": row[0],
+                "type": row[1],
+                "reference_commerciale": row[2],
+                "port_communication": row[3],
+                "nom_piece": row[4],
+                "derniere_valeur": row[5],
+                "date_insertion": row[6],
+                "etat": row[7]  # État déterminé : Actif/Inactif
             }
             for row in capteurs
         ]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+        return result
+    finally:
+        conn.close()
     
 @app.get("/economie")
 async def get_economie(scale: str = "monthly"):
@@ -668,3 +715,197 @@ async def modifier_logement(logement_id: int, data: dict):
         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+#gestion des pieces
+class Piece(BaseModel):
+    nom_piece: str
+    coordonnees_x: float = 0.0
+    coordonnees_y: float = 0.0
+    coordonnees_z: float = 0.0
+    id_logement: int
+
+# Fonction pour initialiser la base
+def get_db():
+    conn = sqlite3.connect("mabase.db")
+    return conn
+
+# @app.get("/pieces/{id_logement}")
+# async def get_pieces(id_logement: int):
+#     conn = get_db()
+#     cursor = conn.cursor()
+#     cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
+#     pieces = cursor.fetchall()
+#     conn.close()
+#     return [{"id_piece": row[0], "nom_piece": row[1], "coordonnees_x": row[2], "coordonnees_y": row[3], "coordonnees_z": row[4]} for row in pieces]
+from fastapi import HTTPException
+
+@app.get("/pieces/{id_logement}")
+async def get_pieces(id_logement: int):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Vérifier si le logement existe
+    cursor.execute("SELECT COUNT(*) FROM Logement WHERE id_logement = ?", (id_logement,))
+    logement_existe = cursor.fetchone()[0]
+
+    if not logement_existe:
+        conn.close()
+        raise HTTPException(status_code=404, detail=f"Le logement avec ID {id_logement} n'existe pas.")
+
+    # Récupérer les pièces associées à ce logement
+    cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
+    pieces = cursor.fetchall()
+    conn.close()
+
+    # Retourner les résultats ou un message si aucune pièce n'est trouvée
+    if not pieces:
+        raise HTTPException(status_code=404, detail=f"Aucune pièce trouvée pour le logement avec ID {id_logement}.")
+
+    return [
+        {
+            "id_piece": row[0],
+            "nom_piece": row[1],
+            "coordonnees_x": row[2],
+            "coordonnees_y": row[3],
+            "coordonnees_z": row[4]
+        } 
+        for row in pieces
+    ]
+
+
+# Ajouter une pièce
+
+@app.post("/pieces")
+async def ajouter_piece(piece: Piece):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # Vérifier si le logement existe
+        cursor.execute("SELECT id_logement FROM Logement WHERE id_logement = ?", (piece.id_logement,))
+        logement_existe = cursor.fetchone()
+        if not logement_existe:
+            raise HTTPException(status_code=404, detail=f"Le logement avec ID {piece.id_logement} n'existe pas.")
+
+        # Ajouter la pièce
+        cursor.execute(
+            """
+            INSERT INTO Piece (nom_piece, coordonnees_x, coordonnees_y, coordonnees_z, id_logement) 
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (piece.nom_piece, piece.coordonnees_x, piece.coordonnees_y, piece.coordonnees_z, piece.id_logement)
+        )
+        conn.commit()
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+    finally:
+        conn.close()
+    return {"message": "Pièce ajoutée avec succès."}
+
+# Modifier une pièce
+# @app.put("/pieces/{id_piece}")
+# async def modifier_piece(id_piece: int, piece: Piece):
+#     conn = get_db()
+#     cursor = conn.cursor()
+#     try:
+#         # Vérification si la pièce existe
+#         cursor.execute("SELECT id_piece FROM Piece WHERE id_piece = ?", (id_piece,))
+#         piece_existe = cursor.fetchone()
+#         if not piece_existe:
+#             raise HTTPException(status_code=404, detail=f"La pièce avec ID {id_piece} n'existe pas.")
+
+#         # Vérification si l'id_logement existe (si fourni)
+#         cursor.execute("SELECT id_logement FROM Logement WHERE id_logement = ?", (piece.id_logement,))
+#         logement_existe = cursor.fetchone()
+#         if not logement_existe:
+#             raise HTTPException(status_code=404, detail=f"Le logement avec ID {piece.id_logement} n'existe pas.")
+
+#         # Modifier la pièce si les vérifications sont OK
+#         cursor.execute(
+#             """
+#             UPDATE Piece 
+#             SET nom_piece = ?, coordonnees_x = ?, coordonnees_y = ?, coordonnees_z = ?, id_logement = ?
+#             WHERE id_piece = ?
+#             """,
+#             (piece.nom_piece, piece.coordonnees_x, piece.coordonnees_y, piece.coordonnees_z, piece.id_logement, id_piece)
+#         )
+#         conn.commit()
+
+#         # Vérification de l'impact de la mise à jour
+#         if cursor.rowcount == 0:
+#             raise HTTPException(status_code=400, detail="Aucune modification apportée à la pièce.")
+
+#     except sqlite3.Error as e:
+#         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
+#     finally:
+#         conn.close()
+
+#     return {"message": "Pièce modifiée avec succès."}
+
+from typing import Optional
+
+class Piece(BaseModel):
+    nom_piece: Optional[str]
+    coordonnees_x: Optional[float] = 0
+    coordonnees_y: Optional[float] = 0
+    coordonnees_z: Optional[float] = 0
+
+@app.put("/pieces/{id_piece}")
+async def modifier_piece(id_piece: int, piece: Piece):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # Vérifier si la pièce existe
+        cursor.execute("SELECT * FROM Piece WHERE id_piece = ?", (id_piece,))
+        existing_piece = cursor.fetchone()
+        if not existing_piece:
+            raise HTTPException(status_code=404, detail="La pièce n'existe pas.")
+
+        # Mettre à jour la pièce
+        cursor.execute(
+            """
+            UPDATE Piece
+            SET nom_piece = COALESCE(?, nom_piece),
+                coordonnees_x = COALESCE(?, coordonnees_x),
+                coordonnees_y = COALESCE(?, coordonnees_y),
+                coordonnees_z = COALESCE(?, coordonnees_z)
+            WHERE id_piece = ?
+            """,
+            (piece.nom_piece, piece.coordonnees_x, piece.coordonnees_y, piece.coordonnees_z, id_piece)
+        )
+        conn.commit()
+        return {"message": "Pièce modifiée avec succès."}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+# Supprimer une pièce
+
+@app.delete("/pieces/{id_piece}")
+async def supprimer_piece(id_piece: int):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Vérifier si la pièce existe
+    cursor.execute("SELECT * FROM Piece WHERE id_piece = ?", (id_piece,))
+    piece = cursor.fetchone()
+
+    if not piece:
+        conn.close()
+        raise HTTPException(status_code=404, detail=f"La pièce avec ID {id_piece} n'existe pas.")
+
+    # Supprimer la pièce
+    cursor.execute("DELETE FROM Piece WHERE id_piece = ?", (id_piece,))
+    conn.commit()
+
+    # Vérifier si une ligne a été supprimée
+    if cursor.rowcount == 0:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"Impossible de supprimer la pièce avec ID {id_piece}.")
+
+    conn.close()
+    return {"status": "success", "message": f"La pièce avec ID {id_piece} a été supprimée avec succès."}
