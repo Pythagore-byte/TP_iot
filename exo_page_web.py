@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
 import sqlite3
 import random
@@ -359,32 +359,73 @@ async def get_economie(scale: str = "monthly"):
         raise HTTPException(status_code=500, detail="Erreur serveur : " + str(e))
 
     
+# @app.get("/consommation")
+# async def get_consommation():
+#     """
+#     Endpoint pour récupérer les données de consommation.
+#     Retourne un JSON avec les données groupées par type de facture.
+#     """
+#     try:
+#         conn = initialisation_base()
+#         cursor = conn.cursor()
+
+#         # Exemple de requête SQL
+#         query = """
+#             SELECT type_facture, SUM(valeur_consommee) AS total_consomme
+#             FROM Facture
+#             GROUP BY type_facture;
+#         """
+#         cursor.execute(query)
+#         result = cursor.fetchall()
+
+#         conn.close()
+
+#         # Retourner les données en format JSON
+#         return [{"type_facture": row["type_facture"], "total_consomme": row["total_consomme"]} for row in result]
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Erreur serveur : {e}")
 @app.get("/consommation")
-async def get_consommation():
+async def get_consommation(echelle: str = "mois"):
     """
-    Endpoint pour récupérer les données de consommation.
-    Retourne un JSON avec les données groupées par type de facture.
+    Endpoint pour récupérer les données de consommation selon l'échelle de temps choisie.
+    - `echelle`: peut être "jour", "semaine", "mois", ou "annee".
     """
     try:
         conn = initialisation_base()
         cursor = conn.cursor()
 
-        # Exemple de requête SQL
-        query = """
-            SELECT type_facture, SUM(valeur_consommee) AS total_consomme
+        # Déterminer la colonne de regroupement selon l'échelle
+        if echelle == "jour":
+            periode_format = "%Y-%m-%d"
+        elif echelle == "semaine":
+            periode_format = "%Y-%W"
+        elif echelle == "mois":
+            periode_format = "%Y-%m"
+        elif echelle == "annee":
+            periode_format = "%Y"
+        else:
+            raise HTTPException(status_code=400, detail="Échelle invalide. Utilisez 'jour', 'semaine', 'mois' ou 'annee'.")
+
+        # Requête SQL
+        query = f"""
+            SELECT type_facture, 
+                   strftime('{periode_format}', date_facture) AS periode,
+                   SUM(valeur_consommee) AS total_consomme
             FROM Facture
-            GROUP BY type_facture;
+            GROUP BY type_facture, periode
+            ORDER BY periode, type_facture;
         """
         cursor.execute(query)
         result = cursor.fetchall()
 
         conn.close()
 
-        # Retourner les données en format JSON
-        return [{"type_facture": row["type_facture"], "total_consomme": row["total_consomme"]} for row in result]
+        # Retourner les résultats sous forme JSON
+        return [{"type_facture": row["type_facture"], "periode": row["periode"], "total_consomme": row["total_consomme"]} for row in result]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur serveur : {e}")
 
+    
 @app.post("/configuration")
 async def ajouter_capteur_actionneur(data: dict):
     """
@@ -958,3 +999,18 @@ async def supprimer_piece(id_piece: int):
 
     conn.close()
     return {"status": "success", "message": f"La pièce avec ID {id_piece} a été supprimée avec succès."}
+@app.get("/type_capteurs")
+async def get_type_capteurs():
+    """
+    Récupère tous les types de capteurs avec leurs références.
+    """
+    try:
+        conn = initialisation_base()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id_type_capteur, nom, unite_mesure, plage_precision FROM TypeCapteur")
+        result = cursor.fetchall()
+        conn.close()
+
+        return [{"id": row[0], "nom": row[1], "unite_mesure": row[2], "plage_precision": row[3]} for row in result]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur serveur : {e}")

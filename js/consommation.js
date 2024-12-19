@@ -1,33 +1,4 @@
-// google.charts.load('current', { packages: ['corechart'] });
-// google.charts.setOnLoadCallback(drawChart);
 
-// async function drawChart() {
-//     try {
-//         // Appel de l'API FastAPI pour récupérer les données de consommation
-//         const response = await fetch("http://127.0.0.1:8000/consommation");
-//         if (!response.ok) {
-//             throw new Error("Erreur lors du chargement des consommations");
-//         }
-
-//         const data = await response.json();
-
-//         // Préparer les données pour Google Charts
-//         const chartData = [["Type", "Consommation"]];
-//         data.forEach((item) => chartData.push([item.type, item.total]));
-
-//         // Créer le graphique
-//         const googleData = google.visualization.arrayToDataTable(chartData);
-//         const options = {
-//             title: "Consommation énergétique",
-//             is3D: true
-//         };
-//         const chart = new google.visualization.PieChart(document.getElementById("chart_div"));
-//         chart.draw(googleData, options);
-//     } catch (error) {
-//         console.error("Erreur lors du chargement des consommations :", error);
-//         alert("Impossible de charger les données de consommation.");
-//     }
-// }
 // async function chargerConsommation() {
 //     try {
 //         // URL de l'endpoint API pour les données de consommation
@@ -62,43 +33,117 @@
 //         alert("Impossible de charger les données de consommation.");
 //     }
 // }
+// Variable globale pour le graphique
+let consommationChart;
 
-// // Charger les données à l'ouverture de la page
-// document.addEventListener("DOMContentLoaded", chargerConsommation);
+// Fonction pour afficher le graphique
+function afficherGraphique(labels, data) {
+    const ctx = document.getElementById("consommation-chart").getContext("2d");
+
+    // Si un graphique existe déjà, détruisez-le pour éviter l'erreur
+    if (consommationChart) {
+        consommationChart.destroy();
+    }
+
+    consommationChart = new Chart(ctx, {
+        type: "bar", // Type de graphique : barres verticales
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Total Consommé (unités)",
+                data: data,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true, // Activer la légende
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `${context.label}: ${context.raw} unités`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        autoSkip: true,
+                        maxRotation: 45,
+                        minRotation: 0
+                    }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Fonction pour charger les données de consommation
 async function chargerConsommation() {
     try {
-        // URL de l'endpoint API pour les données de consommation
-        const apiUrl = "http://127.0.0.1:8000/consommation";
+        const periode = document.getElementById("periode-select").value;
+        const apiUrl = `http://127.0.0.1:8000/consommation?echelle=${periode}`;
         const response = await fetch(apiUrl);
 
-        // Vérification de la réponse
         if (!response.ok) {
-            throw new Error("Erreur lors du chargement des données de consommation");
+            throw new Error(`Erreur HTTP : ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const consommationData = await response.json();
 
-        // Sélection du tableau dans le DOM
+        // Remplir le tableau
         const tableBody = document.getElementById("consommation-table");
-
-        // Vider le tableau pour éviter les doublons
         tableBody.innerHTML = "";
-
-        // Insérer les données dans le tableau
-        data.forEach((item) => {
+        consommationData.forEach(item => {
             const row = `
                 <tr>
+                    <td>${item.periode || "N/A"}</td>
                     <td>${item.type_facture}</td>
-                    <td>${item.total_consomme || "N/A"}</td>
+                    <td>${item.total_consomme.toFixed(2)}</td>
                 </tr>
             `;
             tableBody.innerHTML += row;
         });
+
+        // Préparer les données pour le graphique
+        const labels = consommationData.map(item => `${item.type_facture} (${item.periode})`);
+        const data = consommationData.map(item => item.total_consomme);
+
+        // Afficher le graphique
+        afficherGraphique(labels, data);
+
     } catch (error) {
-        console.error("Erreur :", error);
-        alert("Impossible de charger les données de consommation.");
+        console.error("Erreur lors du chargement des données :", error);
+        alert("Impossible de charger les données de consommation. Veuillez réessayer plus tard.");
     }
 }
 
-// Charger les données à l'ouverture de la page
+// Charger les données au chargement de la page et lors du changement de période
 document.addEventListener("DOMContentLoaded", chargerConsommation);
+document.getElementById("periode-select").addEventListener("change", chargerConsommation);
