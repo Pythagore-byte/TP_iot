@@ -44,8 +44,8 @@
             <h2>Ajouter un Capteur</h2>
             <form id="configuration-form" class="form">
                 <div class="form-group">
-                    <label for="type">Type de Capteur</label>
-                    <select name="type" id="type" ></select>
+                    <label for="id_type_capteur">Type de Capteur</label>
+                    <select name="id_type_capteur" id="id_type_capteur" ></select>
                 </div> 
                 <div class="form-group">
                     <label for="reference">Référence Commerciale</label>
@@ -55,14 +55,23 @@
                     <label for="port">Port de Communication</label>
                     <input type="text" id="port" name="port" placeholder="Exemple : COM3" required>
                 </div>
+                <!-- Formulaire pour sélectionner un logement et une pièce -->
                 <div class="form-group">
-                    <label for="id_piece">ID de la Pièce</label>
-                    <input type="number" id="id_piece" name="id_piece" placeholder="Exemple : 1" required>
+                    <label for="id_logement">Logement</label>
+                    <select id="id_logement" name="id_logement" required>
+                        <option value="">Sélectionnez un logement</option>
+                        <!-- Options seront ajoutées dynamiquement -->
+                    </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="id_type_capteur">ID du Type de Capteur</label>
-                    <input type="number" id="id_type_capteur" name="id_type_capteur" placeholder="Exemple : 1" required>
-                </div> 
+                    <label for="id_piece">Pièce</label>
+                    <select id="id_piece" name="id_piece" required disabled>
+                        <option value="">Sélectionnez une pièce</option>
+                        <!-- Options seront ajoutées dynamiquement après la sélection du logement -->
+                    </select>
+                </div>
+                <input type="hidden" id="type" name="type" required>
                 <button type="submit" class="btn">Ajouter le Capteur</button> 
                 
                 
