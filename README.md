@@ -53,12 +53,13 @@ cd <nom_du_dossier_cloné>
 #### b. Lancer le serveur FastAPI :
    - Dans le répertoire où se trouve le fichier backend (`exo_page_web.py`), exécutez :
      ```bash
-     uvicorn exo_page_web.py:app --reload ou fastapi run exo_page_web.py
+     uvicorn exo_page_web:app --reload ou fastapi run exo_page_web.py
      ```
 
    - Une fois démarré, le serveur sera accessible à :
      ```
-     http://127.0.0.1:8000
+     http://127.0.0.1:8080 ici vous verez une petite interface graphique , vous pouvez tout simplement cliquez sur le bouton "Documentation de l'API" afin d'explorez toutes les fonctionnalités et services de mon serveur. 
+   
      ```
 
 #### c. Documentation des API :
@@ -79,9 +80,10 @@ cd <nom_du_dossier_cloné>
      ```bash
      python -m http.server
      ```
-   - Par défaut, le site sera accessible à :
+   - Par défaut, le site sera accessible à : 
+   127.0.0.1:8000 , ici on accede directement à la page d'accueil 
      ```
-     http://127.0.0.1:8000 , ici vous verez une petite interface graphique , vous pouvez tout simplement cliquez sur le bouton "Documentation de l'API" afin d'explorez toutes les fonctionnalités et services de mon serveur. 
+     
      ```
 
 ---
