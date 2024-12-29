@@ -1,11 +1,13 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Path
 from fastapi.responses import HTMLResponse
 import sqlite3
 import random
-import httpx
+import httpx, uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime, timedelta
+from typing import Optional
+
 
 API_KEY = "f3e25221109fa7d38b649edfff5827f2"
 BASE_URL = "https://api.openweathermap.org/data/2.5/forecast"
@@ -20,14 +22,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Remplacez "*" par les domaines autorisés si nécessaire
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-
+#######################################################################
 tables_autorisees = ["Logement", "Piece", "Facture", "Mesure", "CapteurActionneur", "TypeCapteur", ""]
 liste_facture = [
     "Eau",
@@ -358,72 +358,7 @@ async def get_economie(scale: str = "monthly"):
         print("Erreur serveur :", e)
         raise HTTPException(status_code=500, detail="Erreur serveur : " + str(e))
 
-    
-# @app.get("/consommation")
-# async def get_consommation():
-#     """
-#     Endpoint pour récupérer les données de consommation.
-#     Retourne un JSON avec les données groupées par type de facture.
-#     """
-#     try:
-#         conn = initialisation_base()
-#         cursor = conn.cursor()
-
-#         # Exemple de requête SQL
-#         query = """
-#             SELECT type_facture, SUM(valeur_consommee) AS total_consomme
-#             FROM Facture
-#             GROUP BY type_facture;
-#         """
-#         cursor.execute(query)
-#         result = cursor.fetchall()
-
-#         conn.close()
-
-#         # Retourner les données en format JSON
-#         return [{"type_facture": row["type_facture"], "total_consomme": row["total_consomme"]} for row in result]
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur serveur : {e}")
-@app.get("/consommation")
-async def get_consommation(echelle: str = "mois"):
-    """
-    Endpoint pour récupérer les données de consommation selon l'échelle de temps choisie.
-    - `echelle`: peut être "jour", "semaine", "mois", ou "annee".
-    """
-    try:
-        conn = initialisation_base()
-        cursor = conn.cursor()
-
-        # Déterminer la colonne de regroupement selon l'échelle
-        if echelle == "jour":
-            periode_format = "%Y-%m-%d"
-        elif echelle == "semaine":
-            periode_format = "%Y-%W"
-        elif echelle == "mois":
-            periode_format = "%Y-%m"
-        elif echelle == "annee":
-            periode_format = "%Y"
-        else:
-            raise HTTPException(status_code=400, detail="Échelle invalide. Utilisez 'jour', 'semaine', 'mois' ou 'annee'.")
-
-        # Requête SQL
-        query = f"""
-            SELECT type_facture, 
-                   strftime('{periode_format}', date_facture) AS periode,
-                   SUM(valeur_consommee) AS total_consomme
-            FROM Facture
-            GROUP BY type_facture, periode
-            ORDER BY periode, type_facture;
-        """
-        cursor.execute(query)
-        result = cursor.fetchall()
-
-        conn.close()
-
-        # Retourner les résultats sous forme JSON
-        return [{"type_facture": row["type_facture"], "periode": row["periode"], "total_consomme": row["total_consomme"]} for row in result]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur serveur : {e}")
+#######################################################################
 
     
 @app.post("/configuration")
@@ -608,57 +543,7 @@ async def delete_logement(id: int):
     conn.close()
     return {"status": "success", "message": "Logement supprimé avec succès"}
 
-
-# @app.put("/logements/{logement_id}")
-# async def modifier_logement(logement_id: int, data: dict):
-#     """
-#     Endpoint pour modifier un logement.
-#     Exemple de données JSON envoyées :
-#     {
-#         "adresse": "Nouvelle adresse",
-#         "numero_telephone": "Nouveau numéro",
-#         "adresse_ip": "Nouvelle IP"
-#     }
-#     """
-#     try:
-#         # Connexion à la base
-#         conn = initialisation_base()
-#         c = conn.cursor()
-
-#         # Vérifier si le logement existe
-#         c.execute("SELECT * FROM Logement WHERE id_logement = ?", (logement_id,))
-#         logement = c.fetchone()
-#         if not logement:
-#             raise HTTPException(status_code=404, detail="Logement introuvable")
-
-#         # Construire la requête de mise à jour
-#         updates = []
-#         values = []
-#         if "adresse" in data:
-#             updates.append("adresse = ?")
-#             values.append(data["adresse"])
-#         if "numero_telephone" in data:
-#             updates.append("numero_telephone = ?")
-#             values.append(data["numero_telephone"])
-#         if "adresse_ip" in data:
-#             updates.append("adresse_ip = ?")
-#             values.append(data["adresse_ip"])
-
-#         if not updates:
-#             raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
-
-#         values.append(logement_id)
-#         query = f"UPDATE Logement SET {', '.join(updates)} WHERE id_logement = ?"
-#         c.execute(query, tuple(values))
-#         conn.commit()
-#         conn.close()
-
-#         return {"status": "success", "message": "Logement modifié avec succès."}
-#     except sqlite3.Error as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
-
+#######################################################################
 @app.put("/logements/{logement_id}")
 async def modifier_logement(logement_id: int, data: dict):
     """
@@ -721,113 +606,7 @@ class Piece(BaseModel):
 def get_db():
     conn = sqlite3.connect("mabase.db")
     return conn
-
-# @app.get("/pieces/{id_logement}")
-# async def get_pieces(id_logement: int):
-#     conn = get_db()
-#     cursor = conn.cursor()
-#     cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
-#     pieces = cursor.fetchall()
-#     conn.close()
-#     return [{"id_piece": row[0], "nom_piece": row[1], "coordonnees_x": row[2], "coordonnees_y": row[3], "coordonnees_z": row[4]} for row in pieces]
-
-
-# @app.get("/pieces/{id_logement}")
-# async def get_pieces(id_logement: int):
-#     conn = get_db()
-#     cursor = conn.cursor()
-
-#     # Vérifier si le logement existe
-#     cursor.execute("SELECT COUNT(*) FROM Logement WHERE id_logement = ?", (id_logement,))
-#     logement_existe = cursor.fetchone()[0]
-
-#     if not logement_existe:
-#         conn.close()
-#         raise HTTPException(status_code=404, detail=f"Le logement avec ID {id_logement} n'existe pas.")
-
-#     # Récupérer les pièces associées à ce logement
-#     cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
-#     pieces = cursor.fetchall()
-#     conn.close()
-
-#     # Retourner les résultats ou un message si aucune pièce n'est trouvée
-#     if not pieces:
-#         raise HTTPException(status_code=404, detail=f"Aucune pièce trouvée pour le logement avec ID {id_logement}.")
-
-#     return [
-#         {
-#             "id_piece": row[0],
-#             "nom_piece": row[1],
-#             "coordonnees_x": row[2],
-#             "coordonnees_y": row[3],
-#             "coordonnees_z": row[4]
-#         } 
-#         for row in pieces
-#     ]
-# @app.get("/pieces/{id_logement}")
-# async def get_pieces(id_logement: int):
-#     conn = get_db()
-#     cursor = conn.cursor()
-
-#     # Vérifier si le logement existe
-#     cursor.execute("SELECT COUNT(*) FROM Logement WHERE id_logement = ?", (id_logement,))
-#     logement_existe = cursor.fetchone()[0]
-
-#     if not logement_existe:
-#         conn.close()
-#         raise HTTPException(status_code=404, detail=f"Le logement avec ID {id_logement} n'existe pas.")
-
-#     # Récupérer les pièces associées à ce logement
-#     cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
-#     pieces = cursor.fetchall()
-#     conn.close()
-
-#     # Retourner une liste vide si aucune pièce n'est trouvée
-#     if not pieces:
-#         return []
-
-#     return [
-#         {
-#             "id_piece": row[0],
-#             "nom_piece": row[1],
-#             "coordonnees_x": row[2],
-#             "coordonnees_y": row[3],
-#             "coordonnees_z": row[4]
-#         }
-#         for row in pieces
-#     ]
-# @app.get("/pieces/{id_logement}")
-# async def get_pieces(id_logement: int):
-#     conn = get_db()
-#     cursor = conn.cursor()
-
-#     # Vérifier si le logement existe
-#     cursor.execute("SELECT COUNT(*) FROM Logement WHERE id_logement = ?", (id_logement,))
-#     logement_existe = cursor.fetchone()[0]
-
-#     if not logement_existe:
-#         conn.close()
-#         raise HTTPException(status_code=404, detail=f"Le logement avec ID {id_logement} n'existe pas.")
-
-#     # Récupérer les pièces associées à ce logement
-#     cursor.execute("SELECT * FROM Piece WHERE id_logement = ?", (id_logement,))
-#     pieces = cursor.fetchall()
-#     conn.close()
-
-#     # Retourner une liste vide si aucune pièce n'est trouvée
-#     return [
-#         {
-#             "id_piece": row[0],
-#             "nom_piece": row[1],
-#             "coordonnees_x": row[2],
-#             "coordonnees_y": row[3],
-#             "coordonnees_z": row[4]
-#         }
-#         for row in pieces
-#     ]
-
-from fastapi import HTTPException, Path
-
+#######################################################################
 @app.get("/pieces/{id_logement}")
 async def get_pieces(id_logement: int = Path(..., title="L'identifiant du logement", ge=1)):
     if not id_logement:
@@ -891,50 +670,7 @@ async def ajouter_piece(piece: Piece):
     finally:
         conn.close()
     return {"message": "Pièce ajoutée avec succès."}
-
-# Modifier une pièce
-# @app.put("/pieces/{id_piece}")
-# async def modifier_piece(id_piece: int, piece: Piece):
-#     conn = get_db()
-#     cursor = conn.cursor()
-#     try:
-#         # Vérification si la pièce existe
-#         cursor.execute("SELECT id_piece FROM Piece WHERE id_piece = ?", (id_piece,))
-#         piece_existe = cursor.fetchone()
-#         if not piece_existe:
-#             raise HTTPException(status_code=404, detail=f"La pièce avec ID {id_piece} n'existe pas.")
-
-#         # Vérification si l'id_logement existe (si fourni)
-#         cursor.execute("SELECT id_logement FROM Logement WHERE id_logement = ?", (piece.id_logement,))
-#         logement_existe = cursor.fetchone()
-#         if not logement_existe:
-#             raise HTTPException(status_code=404, detail=f"Le logement avec ID {piece.id_logement} n'existe pas.")
-
-#         # Modifier la pièce si les vérifications sont OK
-#         cursor.execute(
-#             """
-#             UPDATE Piece 
-#             SET nom_piece = ?, coordonnees_x = ?, coordonnees_y = ?, coordonnees_z = ?, id_logement = ?
-#             WHERE id_piece = ?
-#             """,
-#             (piece.nom_piece, piece.coordonnees_x, piece.coordonnees_y, piece.coordonnees_z, piece.id_logement, id_piece)
-#         )
-#         conn.commit()
-
-#         # Vérification de l'impact de la mise à jour
-#         if cursor.rowcount == 0:
-#             raise HTTPException(status_code=400, detail="Aucune modification apportée à la pièce.")
-
-#     except sqlite3.Error as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur SQLite : {str(e)}")
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur serveur : {str(e)}")
-#     finally:
-#         conn.close()
-
-#     return {"message": "Pièce modifiée avec succès."}
-
-from typing import Optional
+#######################################################################
 
 class Piece(BaseModel):
     nom_piece: Optional[str]
@@ -1014,3 +750,100 @@ async def get_type_capteurs():
         return [{"id": row[0], "nom": row[1], "unite_mesure": row[2], "plage_precision": row[3]} for row in result]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur serveur : {e}")
+#######################################################################
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bienvenue sur mon serveur</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                background-color: #f4f4f4;
+                color: #333;
+            }
+            .container {
+                margin-top: 50px;
+            }
+            h1 {
+                color: #00b894;
+            }
+            p {
+                font-size: 1.2rem;
+            }
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                margin-top: 20px;
+                background-color: #00b894;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            .btn:hover {
+                background-color: #019875;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Bienvenue sur mon serveur FastAPI</h1>
+            <p>Explorez les fonctionnalités et services que ce serveur propose.</p>
+            <a href="/docs" class="btn">Documentation de l'API</a>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+@app.get("/consommation")
+async def get_consommation(echelle: str = "mois"):
+    """
+    Endpoint pour récupérer les données de consommation selon l'échelle de temps choisie.
+    - `echelle`: peut être "jour", "semaine", "mois", ou "annee".
+    """
+    try:
+        conn = initialisation_base()
+        cursor = conn.cursor()
+
+        # Déterminer la colonne de regroupement selon l'échelle
+        if echelle == "jour":
+            periode_format = "%Y-%m-%d"
+        elif echelle == "semaine":
+            periode_format = "%Y-%W"
+        elif echelle == "mois":
+            periode_format = "%Y-%m"
+        elif echelle == "annee":
+            periode_format = "%Y"
+        else:
+            raise HTTPException(status_code=400, detail="Échelle invalide. Utilisez 'jour', 'semaine', 'mois' ou 'annee'.")
+
+        # Requête SQL
+        query = f"""
+            SELECT type_facture, 
+                   strftime('{periode_format}', date_facture) AS periode,
+                   SUM(valeur_consommee) AS total_consomme
+            FROM Facture
+            GROUP BY type_facture, periode
+            ORDER BY periode, type_facture;
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        conn.close()
+
+        # Retourner les résultats sous forme JSON
+        return [{"type_facture": row["type_facture"], "periode": row["periode"], "total_consomme": row["total_consomme"]} for row in result]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur serveur : {e}")
+
+
+if __name__ == "__main__":
+    uvicorn.run("exo_page_web:app", host="127.0.0.1", port=8080, reload=True)
+

@@ -1,6 +1,6 @@
 async function chargerLogements() {
     try {
-        const response = await fetch("http://127.0.0.1:8000/logements");
+        const response = await fetch("http://127.0.0.1:8080/logements");
         if (!response.ok) throw new Error("Erreur lors du chargement des logements");
 
         const logements = await response.json();
@@ -39,7 +39,7 @@ document.getElementById("add-logement-form").addEventListener("submit", async (e
     const adresse_ip = document.getElementById("ip-logement").value;
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/logements", {
+        const response = await fetch("http://127.0.0.1:8080/logements", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ adresse, numero_telephone, adresse_ip }),
@@ -62,7 +62,7 @@ document.getElementById("add-logement-form").addEventListener("submit", async (e
 // Supprimer un logement
 async function supprimerLogement(id) {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/logements/${id}`, { method: "DELETE" });
+        const response = await fetch(`http://127.0.0.1:8080/logements/${id}`, { method: "DELETE" });
 
         if (response.ok) {
             alert("Logement supprimé avec succès !");
@@ -92,7 +92,7 @@ document.getElementById("edit-logement-form").addEventListener("submit", async (
     if (adresse_ip) payload.adresse_ip = adresse_ip;
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/logements/${id}`, {
+        const response = await fetch(`http://127.0.0.1:8080/logements/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),

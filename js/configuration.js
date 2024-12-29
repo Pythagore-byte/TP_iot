@@ -4,6 +4,7 @@ document.getElementById("configuration-form").addEventListener("submit", async (
 
     // Récupérer les valeurs du formulaire
     const type = document.getElementById("type").value;
+    console.log(type);
     const reference_commerciale = document.getElementById("reference").value;
     const port_communication = document.getElementById("port").value;
     const id_piece = document.getElementById("id_piece").value;
@@ -11,7 +12,7 @@ document.getElementById("configuration-form").addEventListener("submit", async (
 
     try {
         // Envoyer les données à l'API FastAPI
-        const response = await fetch("http://127.0.0.1:8000/configuration", {
+        const response = await fetch("http://127.0.0.1:8080/configuration", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -25,7 +26,6 @@ document.getElementById("configuration-form").addEventListener("submit", async (
 
         if (response.ok) {
             alert("Capteur ajouté avec succès !");
-            chargerCapteurs();
             // Réinitialiser le formulaire
             document.getElementById("configuration-form").reset();
         } else {
@@ -43,7 +43,7 @@ document.getElementById("configuration-form").addEventListener("submit", async (
 // Supprimer un capteur
 async function supprimerCapteur(capteur_id) {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/capteurs/${capteur_id}`, {
+        const response = await fetch(`http://127.0.0.1:8080/capteurs/${capteur_id}`, {
             method: "DELETE",
         });
 
@@ -70,23 +70,25 @@ document.getElementById("form-suppression").addEventListener("submit", async (ev
 // Charger la liste des capteurs
 async function chargerCapteurs() {
     try {
-        const response = await fetch("http://127.0.0.1:8000/capteurs");
+        const response = await fetch("http://127.0.0.1:8080/capteurs");
         if (!response.ok) {
             throw new Error("Erreur lors du chargement des capteurs");
         }
 
         const capteurs = await response.json();
+        console.log(capteurs);
         const tableBody = document.getElementById("capteurs-table");
         tableBody.innerHTML = ""; // Réinitialise le tableau
-    
+
         capteurs.forEach((capteur) => {
             const row = `
                 <tr>
                     <td>${capteur.id}</td>
-                    <td>${capteur.type}</td>
+                     <td>${capteur.type}</td>
+        
                     <td>${capteur.reference_commerciale}</td>
-                    <td>${capteur.port}</td>
-                    <td>${capteur.piece || "Non défini"}</td>
+                    <td>${capteur.port_communication}</td>
+                    <td>${capteur.nom_piece || "Non défini"}</td>
                     <td>
                         <button class="btn btn-danger" onclick="supprimerCapteur(${capteur.id})">
                             Supprimer
@@ -95,6 +97,7 @@ async function chargerCapteurs() {
                 </tr>
             `;
             tableBody.innerHTML += row;
+            
         });
     } catch (error) {
         console.error("Erreur lors du chargement des capteurs :", error);
@@ -132,18 +135,18 @@ document.getElementById("modification-form").addEventListener("submit", async (e
     const type = document.getElementById("mod-type").value;
     const reference_commerciale = document.getElementById("mod-reference").value;
     const port_communication = document.getElementById("mod-port").value;
-    //const id_type_capteur = document.getElementById("id_type_capteur").value;
+    const id_type_capteur = document.getElementById("id_type_capteur").value;
 
     try {
         // Envoyer les données à l'API FastAPI
-        const response = await fetch(`http://127.0.0.1:8000/capteurs/${id}`, {
+        const response = await fetch(`http://127.0.0.1:8080/capteurs/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 type,
                 reference_commerciale,
                 port_communication,
-                //id_type_capteur,
+                id_type_capteur,
             }),
         });
 
@@ -160,3 +163,32 @@ document.getElementById("modification-form").addEventListener("submit", async (e
         alert("Impossible de modifier le capteur. Veuillez vérifier votre connexion.");
     }
 });
+async function loadCapteurs() {
+    try {
+        // Fetch data from the API
+        const response = await fetch("http://127.0.0.1:8080/type_capteurs");
+        if (!response.ok) {
+            throw new Error("Erreur lors du chargement des capteurs");
+        }
+
+        // Parse the JSON response
+        const capteurs = await response.json();
+
+
+        // Get the select element
+        const selectElement = document.getElementById('type');
+
+        // Populate the select element with options from capteurs
+        capteurs.forEach(capteur => {
+            const option = document.createElement('option'); // Create a new <option> element
+            // option.value = capteur.id; // Assuming each capteur has a unique 'id'
+            option.textContent = capteur.nom; // Assuming each capteur has a 'name'
+            selectElement.appendChild(option); // Append the option to the <select> element
+
+        });
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+loadCapteurs();

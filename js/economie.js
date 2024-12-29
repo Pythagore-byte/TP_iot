@@ -1,7 +1,7 @@
 // async function chargerEconomies() {
 //     try {
 //         // Appel de l'API FastAPI pour récupérer les données d'économies
-//         const response = await fetch("http://127.0.0.1:8000/economie");
+//         const response = await fetch("http://127.0.0.1:8080/economie");
 //         if (!response.ok) {
 //             throw new Error("Erreur lors du chargement des économies");
 //         }
@@ -33,7 +33,7 @@
 // async function chargerEconomies() {
 //     try {
 //         const timeScale = document.getElementById("time-scale").value; // Échelle de temps sélectionnée
-//         const apiUrl = `http://127.0.0.1:8000/economie?scale=${timeScale}`;
+//         const apiUrl = `http://127.0.0.1:8080/economie?scale=${timeScale}`;
 //         console.log("URL API appelée :", apiUrl);
 
 //         const response = await fetch(apiUrl);
@@ -83,7 +83,7 @@
 // async function chargerEconomies() {
 //     try {
 //         const timeScale = document.getElementById("time-scale").value;
-//         const apiUrl = `http://127.0.0.1:8000/economie?scale=${timeScale}`;
+//         const apiUrl = `http://127.0.0.1:8080/economie?scale=${timeScale}`;
 //         console.log("URL API :", apiUrl);
 
 //         const response = await fetch(apiUrl);
@@ -171,7 +171,7 @@
 // async function chargerEconomies() {
 //     try {
 //         const timeScale = document.getElementById("time-scale").value;
-//         const apiUrl = `http://127.0.0.1:8000/economie?scale=${timeScale}`;
+//         const apiUrl = `http://127.0.0.1:8080/economie?scale=${timeScale}`;
 
 //         const response = await fetch(apiUrl);
 //         if (!response.ok) throw new Error(`Erreur API : ${response.statusText}`);
@@ -236,7 +236,7 @@
 async function chargerEconomies() {
     try {
         const timeScale = document.getElementById("time-scale").value;
-        const apiUrl = `http://127.0.0.1:8000/economie?scale=${timeScale}`;
+        const apiUrl = `http://127.0.0.1:8080/economie?scale=${timeScale}`;
         console.log("URL API appelée :", apiUrl);
 
         const response = await fetch(apiUrl);

@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Charger la liste des logements
 async function chargerLogements() {
     try {
-        const response = await fetch("http://127.0.0.1:8000/logements");
+        const response = await fetch("http://127.0.0.1:8080/logements");
         const logements = await response.json();
         const select = document.getElementById("logement-select");
         logements.forEach((logement) => {
@@ -56,7 +56,7 @@ async function chargerLogements() {
 
 async function chargerPieces(idLogement) {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/pieces/${idLogement}`);
+        const response = await fetch(`http://127.0.0.1:8080/pieces/${idLogement}`);
         
         // Vérifie si la réponse est correcte
         if (!response.ok) {
@@ -122,14 +122,14 @@ async function ajouterPiece(idLogement) {
         id_logement: idLogement
     };
 
-    await fetch("http://127.0.0.1:8000/pieces", {
+    await fetch("http://127.0.0.1:8080/pieces", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     });
 
     alert("Pièce ajoutée !");
-    
+
     chargerPieces(idLogement);
     fermerModal();
 }
@@ -153,7 +153,7 @@ async function modifierPiece(idPiece, idLogement) {
         coordonnees_z: parseFloat(document.getElementById("coordonnees-z").value)
     };
 
-    await fetch(`http://127.0.0.1:8000/pieces/${idPiece}`, {
+    await fetch(`http://127.0.0.1:8080/pieces/${idPiece}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
@@ -168,7 +168,7 @@ async function modifierPiece(idPiece, idLogement) {
 async function supprimerPiece(idPiece, idLogement) {
     if (!confirm("Voulez-vous vraiment supprimer cette pièce ?")) return;
 
-    await fetch(`http://127.0.0.1:8000/pieces/${idPiece}`, { method: "DELETE" });
+    await fetch(`http://127.0.0.1:8080/pieces/${idPiece}`, { method: "DELETE" });
     alert("Pièce supprimée avec succes !");
     chargerPieces(idLogement);
 }

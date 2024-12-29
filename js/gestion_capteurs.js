@@ -9,7 +9,7 @@ document.getElementById("form-ajout").addEventListener("submit", async (event) =
     const id_type_capteur = parseInt(document.getElementById("id_type_capteur").value);
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/capteurs", {
+        const response = await fetch("http://127.0.0.1:8080/capteurs", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -37,7 +37,7 @@ document.getElementById("form-suppression").addEventListener("submit", async (ev
     const capteur_id = parseInt(document.getElementById("capteur_id").value);
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/capteurs/${capteur_id}`, {
+        const response = await fetch(`http://127.0.0.1:8080/capteurs/${capteur_id}`, {
             method: "DELETE"
         });
 

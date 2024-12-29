@@ -1,39 +1,4 @@
 
-// async function chargerConsommation() {
-//     try {
-//         // URL de l'endpoint API pour les données de consommation
-//         const apiUrl = "http://127.0.0.1:8000/consommation";
-//         const response = await fetch(apiUrl);
-
-//         // Vérification de la réponse
-//         if (!response.ok) {
-//             throw new Error("Erreur lors du chargement des données de consommation");
-//         }
-
-//         const data = await response.json();
-
-//         // Sélection du tableau dans le DOM
-//         const tableBody = document.getElementById("consommation-table");
-
-//         // Vider le tableau pour éviter les doublons
-//         tableBody.innerHTML = "";
-
-//         // Insérer les données dans le tableau
-//         data.forEach((item) => {
-//             const row = `
-//                 <tr>
-//                     <td>${item.type_facture}</td>
-//                     <td>${item.total_consomme || "N/A"}</td>
-//                 </tr>
-//             `;
-//             tableBody.innerHTML += row;
-//         });
-//     } catch (error) {
-//         console.error("Erreur :", error);
-//         alert("Impossible de charger les données de consommation.");
-//     }
-// }
-// Variable globale pour le graphique
 let consommationChart;
 
 // Fonction pour afficher le graphique
@@ -107,8 +72,7 @@ function afficherGraphique(labels, data) {
 // Fonction pour charger les données de consommation
 async function chargerConsommation() {
     try {
-        const periode = document.getElementById("periode-select").value;
-        const apiUrl = `http://127.0.0.1:8000/consommation?echelle=${periode}`;
+        const periode = document.getElementById("periode-select").value;        const apiUrl = `http://127.0.0.1:8080/consommation?echelle=${periode}`;
         const response = await fetch(apiUrl);
 
         if (!response.ok) {
