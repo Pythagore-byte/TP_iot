@@ -34,7 +34,7 @@
             <ul>
                 <li><a href="#" class="submenu-link active" data-section="ajouter">Ajouter Capteur</a></li>
                 <li><a href="#" class="submenu-link" data-section="supprimer">Supprimer Capteur</a></li>
-                <li><a href="#" class="submenu-link" data-section="afficher">Afficher les Capteurs</a></li>
+                <li><a href="#" class="submenu-link " data-section="afficher">Afficher les Capteurs</a></li>
                 <li><a href="#" class="submenu-link" data-section="modifier">Modifier Capteur</a></li>
             </ul>
         </nav>
@@ -45,8 +45,8 @@
             <form id="configuration-form" class="form">
                 <div class="form-group">
                     <label for="type">Type de Capteur</label>
-                    <input type="text" id="type" name="type" placeholder="Exemple : Température" required>
-                </div>
+                    <select name="type" id="type" ></select>
+                </div> 
                 <div class="form-group">
                     <label for="reference">Référence Commerciale</label>
                     <input type="text" id="reference" name="reference" placeholder="Exemple : TMP123" required>
@@ -62,12 +62,14 @@
                 <div class="form-group">
                     <label for="id_type_capteur">ID du Type de Capteur</label>
                     <input type="number" id="id_type_capteur" name="id_type_capteur" placeholder="Exemple : 1" required>
-                </div>
-                <button type="submit" class="btn">Ajouter le Capteur</button>
+                </div> 
+                <button type="submit" class="btn">Ajouter le Capteur</button> 
+                
+                
             </form>
         </section> 
         
-
+         
         <section id="supprimer" class="config-section">
             <h2>Supprimer un Capteur</h2>
             <form id="form-suppression" class="form">
@@ -128,5 +130,7 @@
     </footer>
 
     <script src="js/configuration.js"></script>
-</body>
+    </body>
 </html>
+
+

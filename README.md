@@ -5,3 +5,11 @@ pour lancer ma base de donnee , on procede comme suit : ouvrir le terminal et ta
 
  Pour lancer mon serveur fastApi : on tappe dans le terminal : fastapi run + le nom du fichier python du serveur.
  
+
+-------------------le contenu de conf.html et js
+
+
+
+
+
+,c

@@ -694,3 +694,27 @@ canvas {
         width: 100%;
     }
 }
+select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 400px;
+}
+
+select:hover {
+    border-color: #00b894;
+}
+
+select:focus {
+    border-color: #00b894;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 184, 148, 0.5);
+}
+
+input[readonly] {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    color: #333;
+}

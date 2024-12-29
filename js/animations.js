@@ -30,3 +30,5 @@ window.onload = () => {
         bannerText.style.opacity = 1;
     }, 500);
 };
+
+

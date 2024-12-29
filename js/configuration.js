@@ -25,6 +25,7 @@ document.getElementById("configuration-form").addEventListener("submit", async (
 
         if (response.ok) {
             alert("Capteur ajouté avec succès !");
+            chargerCapteurs();
             // Réinitialiser le formulaire
             document.getElementById("configuration-form").reset();
         } else {
@@ -77,13 +78,13 @@ async function chargerCapteurs() {
         const capteurs = await response.json();
         const tableBody = document.getElementById("capteurs-table");
         tableBody.innerHTML = ""; // Réinitialise le tableau
-
+    
         capteurs.forEach((capteur) => {
             const row = `
                 <tr>
                     <td>${capteur.id}</td>
                     <td>${capteur.type}</td>
-                    <td>${capteur.reference}</td>
+                    <td>${capteur.reference_commerciale}</td>
                     <td>${capteur.port}</td>
                     <td>${capteur.piece || "Non défini"}</td>
                     <td>

@@ -19,4 +19,5 @@ async function chargerDashboard() {
     }
 }
 
+
 document.addEventListener("DOMContentLoaded", chargerDashboard);
