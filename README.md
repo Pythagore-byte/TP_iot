@@ -19,6 +19,9 @@ Avant de commencer, assurez-vous que votre machine dispose des outils suivants :
      ```bash
      python3 --version
      ```
+     ensuite telecharger toutes les dependances en tapant la commande suivante : pip install -r requirements.txt
+     assurer - vous que le fichier requirements.txt est bien present dans le projet. 
+
 
 ### 2. **FastAPI**
    - Framework backend utilisé pour créer les API.
@@ -65,7 +68,7 @@ cd <nom_du_dossier_cloné>
 #### c. Documentation des API :
    - Vous pouvez explorer les API directement via Swagger à l'adresse suivante :
      ```
-     http://127.0.0.1:8000/docs
+     http://127.0.0.1:8080/docs
      ```
 
 ---
@@ -132,7 +135,7 @@ Voici une brève explication des principaux répertoires et fichiers du projet :
 
    - Le serveur frontend Python utilise également le port `8000`. Vous pouvez spécifier un autre port pour éviter les conflits :
      ```bash
-     python -m http.server 8081
+     python -m http.server 8000
      ```
 
 4. **Éviter les conflits** :

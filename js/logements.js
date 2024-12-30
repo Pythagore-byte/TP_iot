@@ -23,6 +23,7 @@ async function chargerLogements() {
                 </tr>
             `;
             tableBody.innerHTML += row;
+            
         });
     } catch (err) {
         console.error("Erreur lors du chargement des logements :", err);
